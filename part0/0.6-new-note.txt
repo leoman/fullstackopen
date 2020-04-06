@@ -1,0 +1,16 @@
+note over browser:
+A user types a new note into the form field
+The user clicks the submit button 
+end note
+
+browser->server: HTTP POST https://fullstack-exampleapp.herokuapp.com/new_note_spa
+server-->browser: 201 created
+
+note over browser:
+The new note gets added to the array of notes
+browser executes the event handler with the new list of notes
+notes on page get redrawn
+end note
+
+
+
