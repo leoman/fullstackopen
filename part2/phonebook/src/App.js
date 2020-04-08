@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import Service from './services/requestService'
+import Notification from './notification'
 import Filter from './filter'
 import PersonForm from './personform'
 import Persons from './persons'
+import './App.css'
 
 const App = () => {
 
@@ -10,6 +12,7 @@ const App = () => {
   const [ newName, setNewName ] = useState('')
   const [ newNumber, setNewNumber ] = useState('')
   const [ filter, setFilter ] = useState('')
+  const [ message, setMessage ] = useState(null)
 
   useEffect(() => {
     async function fetchData() {
@@ -20,6 +23,13 @@ const App = () => {
   }, [])
 
   const checkForUnique = name => persons.reduce((prev, curr) => (curr.name.toLowerCase() === name.toLowerCase()) ? curr : prev, false);
+
+  const setNewMessage = message => {
+    setMessage(message);
+    setTimeout(() => {
+      setMessage(null)
+    }, 5000);
+  }
 
   const handleNewPerson = (e) => {
     e.preventDefault();
@@ -36,23 +46,45 @@ const App = () => {
         Service.updatePerson(unique.id, newPerson);
         const oldPersonIndex = persons.findIndex(person => person.id === unique.id)
         persons.splice(oldPersonIndex, 1, newPerson);
-        setPersons(persons);
-        return
+
+        try {
+          setPersons(persons);
+          setNewMessage({
+            text: `Updated '${newName}'`,
+            type: 'notification'
+          });
+        } catch(e) {
+          setNewMessage({
+            text: `Error while updating '${newName}'`,
+            type: 'error'
+          });
+        }
       }
     } else {
       const newPerson = { name: newName, number: newNumber };
       Service.createPerson(newPerson);
       setPersons([...persons, newPerson]);
+      setNewMessage({
+        text: `Added '${newName}'`,
+        type: 'notification'
+      });
     }
   }
 
   const handleNewName = name => setNewName(name);
   const handleNewNumber = number => setNewNumber(number);
-  const handleDeleteNumber = ({name, id}) => {
-    if (window.confirm(`Delete ${name}`)) { 
-      Service.deletePerson(id);
-      const newPersons = persons.filter((person) => person.name !== name);
-      setPersons(newPersons);
+  const handleDeleteNumber = async ({name, id}) => {
+    if (window.confirm(`Delete ${name}`)) {
+      try {
+        await Service.deletePerson(id);
+        const newPersons = persons.filter((person) => person.name !== name);
+        setPersons(newPersons);
+      } catch(e) {
+        setNewMessage({
+          text: `Information of '${name}' has already been removed from the server`,
+          type: 'error'
+        });
+      }
     }
   }
 
@@ -63,6 +95,8 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+
+      <Notification message={message} />
 
       <Filter filter={filter} handleFilter={handleFilter} />
 
