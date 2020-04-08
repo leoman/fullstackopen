@@ -19,23 +19,32 @@ const App = () => {
     fetchData();
   }, [])
 
-  const checkForUnique = name => persons.reduce((prev, curr) => (curr.name.toLowerCase() === name.toLowerCase()) ? true : prev, false);
+  const checkForUnique = name => persons.reduce((prev, curr) => (curr.name.toLowerCase() === name.toLowerCase()) ? curr : prev, false);
 
   const handleNewPerson = (e) => {
     e.preventDefault();
 
-    if(checkForUnique(newName)) {
-      alert(`${newName} is already added to phonebook`);
-      return;
-    };
-
-    const newPerson = { name: newName, number: newNumber };
-
-    Service.createPerson(newPerson);
-
-    setPersons([...persons, newPerson]);
     setNewName('');
     setNewNumber('');
+
+    const unique = checkForUnique(newName);
+    const newPerson = { name: newName, number: newNumber };
+    console.log(unique);
+
+    if(unique) {
+      if (window.confirm(`${newName} is already added to the phonebook, replace the old number with a new one?`)) {
+
+        Service.updatePerson(unique.id, newPerson);
+        const oldPersonIndex = persons.findIndex(person => person.id === unique.id)
+        persons.splice(oldPersonIndex, 1, newPerson);
+        setPersons(persons);
+        return
+      }
+    } else {
+      const newPerson = { name: newName, number: newNumber };
+      Service.createPerson(newPerson);
+      setPersons([...persons, newPerson]);
+    }
   }
 
   const handleNewName = name => setNewName(name);
