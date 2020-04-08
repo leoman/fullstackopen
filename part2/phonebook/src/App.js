@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { getAllPersons, createPerson, deletePerson, updatePerson } from './services/requestService'
+import Service from './services/requestService'
 import Filter from './filter'
 import PersonForm from './personform'
 import Persons from './persons'
@@ -11,9 +11,12 @@ const App = () => {
   const [ newNumber, setNewNumber ] = useState('')
   const [ filter, setFilter ] = useState('')
 
-  useEffect(async () => {
-    const persons = await getAllPersons();
-    setPersons(persons)
+  useEffect(() => {
+    async function fetchData() {
+      const persons = await Service.getAllPersons();
+      setPersons(persons)
+    }
+    fetchData();
   }, [])
 
   const checkForUnique = name => persons.reduce((prev, curr) => (curr.name.toLowerCase() === name.toLowerCase()) ? true : prev, false);
@@ -28,11 +31,7 @@ const App = () => {
 
     const newPerson = { name: newName, number: newNumber };
 
-    axios
-      .post('http://localhost:3001/persons', newPerson)
-      .then(response => {
-        console.log(response)
-      })
+    Service.createPerson(newPerson);
 
     setPersons([...persons, newPerson]);
     setNewName('');
@@ -41,6 +40,13 @@ const App = () => {
 
   const handleNewName = name => setNewName(name);
   const handleNewNumber = number => setNewNumber(number);
+  const handleDeleteNumber = ({name, id}) => {
+    if (window.confirm(`Delete ${name}`)) { 
+      Service.deletePerson(id);
+      const newPersons = persons.filter((person) => person.name !== name);
+      setPersons(newPersons);
+    }
+  }
 
   const handleFilter = filter => setFilter(filter);
 
@@ -64,7 +70,7 @@ const App = () => {
 
       <h3>Numbers</h3>
 
-      <Persons persons={filteredPersons} />
+      <Persons persons={filteredPersons} handleDeleteNumber={handleDeleteNumber} />
     </div>
   )
 }
