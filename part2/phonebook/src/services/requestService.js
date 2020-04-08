@@ -16,9 +16,7 @@ const createPerson = async newObject => {
 
 const deletePerson = async id => {
   const deleteUrl = `${baseUrl}/${id}`
-  const request = axios.delete(deleteUrl)
-  const response = await request
-  return response.data
+  return axios.delete(deleteUrl)
 }
 
 const updatePerson = async (id, newPerson) => {
