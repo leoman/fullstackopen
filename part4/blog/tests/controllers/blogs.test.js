@@ -5,12 +5,16 @@ const app = require('../../app')
 const api = supertest(app)
 
 const Blog = require('../../models/blog')
+const User = require('../../models/user')
 
 beforeEach(async () => {
+  await User.deleteMany({})
   await Blog.deleteMany({})
 
+  const user = await helper.saveNewUser('user', 'password')
+
   const blogObjects = helper.initialBlogs
-    .map(blog => new Blog(blog))
+    .map(blog => new Blog({ ...blog, user: user._id }))
   const promiseArray = blogObjects.map(blog => blog.save())
   await Promise.all(promiseArray)
 })
@@ -51,6 +55,9 @@ describe('fetching of blogs', () => {
 describe('saving a blog', () => {
 
   test('a valid post can be added', async () => {
+
+    const token = await helper.getAuthToken('user', 'password')
+
     const newPost = {
       title: 'My third blog',
       author: 'Peter',
@@ -60,6 +67,7 @@ describe('saving a blog', () => {
 
     await api
       .post('/api/blogs')
+      .set('Authorization', `bearer ${token}`)
       .send(newPost)
       .expect(201)
       .expect('Content-Type', /application\/json/)
@@ -74,6 +82,8 @@ describe('saving a blog', () => {
   })
 
   test('if the likes prop is missed out, it defaults to 0', async () => {
+    const token = await helper.getAuthToken('user', 'password')
+
     const newPost = {
       title: 'My fourth blog',
       author: 'Peter',
@@ -82,6 +92,7 @@ describe('saving a blog', () => {
 
     const response = await api
       .post('/api/blogs')
+      .set('Authorization', `bearer ${token}`)
       .send(newPost)
       .expect(201)
       .expect('Content-Type', /application\/json/)
@@ -90,19 +101,38 @@ describe('saving a blog', () => {
   })
 
   test('throw a 400 error if title and url are missing', async () => {
+    const token = await helper.getAuthToken('user', 'password')
+
     const newBlog = {
       author: 'Peter',
       likes: 2,
     }
 
-    await api.post('/api/blogs').send(newBlog).expect(400)
+    await api
+      .post('/api/blogs')
+      .set('Authorization', `bearer ${token}`)
+      .send(newBlog)
+      .expect(400)
   })
 
+  test('throw a 401 Unauthorized if token is not provided', async () => {
+    const newBlog = {
+      author: 'Peter',
+      likes: 2,
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(401)
+  })
 })
 
 describe('deletion of a blog', () => {
 
   test('deleted blog is removed from database', async () => {
+    const token = await helper.getAuthToken('user', 'password')
+
     const newBlog = {
       author: 'Peter',
       title: 'A blog never seen',
@@ -110,9 +140,9 @@ describe('deletion of a blog', () => {
       url: 'www.thebestblog.com',
     }
 
-    const response = await api.post('/api/blogs').send(newBlog)
+    const response = await api.post('/api/blogs').set('Authorization', `bearer ${token}`).send(newBlog)
     const blogsBeforeDeletion = await api.get('/api/blogs')
-    await api.delete(`/api/blogs/${response.body.id}`).expect(204)
+    await api.delete(`/api/blogs/${response.body.id}`).set('Authorization', `bearer ${token}`).expect(204)
     const blogsAfterDeletion = await api.get('/api/blogs')
     expect(blogsBeforeDeletion.body.length).toBe(
       blogsAfterDeletion.body.length + 1
