@@ -44,14 +44,14 @@ const Blog = ({ blog, blogs, setBlogs }) => {
   const isPostByUser = () => blog.user.username === user.username
 
   return (
-    <div style={blogStyle}>
-      <p>{blog.title} <button onClick={toggleShowBlog}>{!showBlog ? 'View' : 'Hide'}</button></p>
+    <div className="blog-item" style={blogStyle}>
+      <p className="title">{blog.title} <button className="view-button" onClick={toggleShowBlog}>{!showBlog ? 'View' : 'Hide'}</button></p>
       <Visable visible={showBlog}>
-        <p>{blog.url}</p>
-        <p>Likes {blog.likes} <button onClick={setNewLike}>Like</button></p>
-        <p>{blog.author}</p>
+        <p className="url">{blog.url}</p>
+        <p className="likes">Likes {blog.likes} <button className="like-button" onClick={setNewLike}>Like</button></p>
+        <p className="author">{blog.author}</p>
         <Visable visible={isPostByUser}>
-          <button onClick={deleteBlog}>Delete</button>
+          <button className="delete-button" onClick={deleteBlog}>Delete</button>
         </Visable>
       </Visable>
     </div>

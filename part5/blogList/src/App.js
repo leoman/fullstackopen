@@ -39,6 +39,31 @@ const App = () => {
     }
   }
 
+  const handleBlogSubmit = async blog => {
+    try {
+      const response = await blogService.create(blog)
+      const blogPost = response.data
+
+      handleSetBlogs(blogPost)
+      setNotificationMessage({
+        text: `a new blog ${blogPost.title} by ${blogPost.author} added`,
+        type: 'notification'
+      })
+      toggleShowBlogForm()
+      setTimeout(() => {
+        setNotificationMessage(null)
+      }, 5000)
+    } catch (exception) {
+      setNotificationMessage({
+        text: 'An error has occured while adding a new blog post',
+        type: 'error'
+      })
+      setTimeout(() => {
+        setNotificationMessage(null)
+      }, 5000)
+    }
+  }
+
   const handleSetBlogs = blog => setBlogs([...blogs, blog])
   const toggleShowBlogForm = () => setShowBlogForm(!showBlogForm)
 
@@ -73,7 +98,7 @@ const App = () => {
       </Visible>
       <Visible visible={user}>
         <Blogs
-          user={!user}
+          user={user}
           handleLogout={handleLogout}
           blogs={sortedBlogs}
           setBlogs={setBlogs}
@@ -81,13 +106,12 @@ const App = () => {
       </Visible>
       <Visible visible={showBlogForm}>
         <BlogForm
-          setBlogs={handleSetBlogs}
-          setNotificationMessage={setNotificationMessage}
+          handleBlogSubmit={handleBlogSubmit}
           toggleShowBlogForm={toggleShowBlogForm}
         />
       </Visible>
-      <Visible visible={!showBlogForm}>
-        <button onClick={() => setShowBlogForm(true)}>New Note</button>
+      <Visible visible={user && !showBlogForm}>
+        <button id="new-note" onClick={() => setShowBlogForm(true)}>New Note</button>
       </Visible>
     </div>
   )

@@ -1,56 +1,35 @@
 import React, { useState } from 'react'
-import blogService from '../services/blogs'
 
-const BlogForm = ({ setBlogs, setNotificationMessage, toggleShowBlogForm }) => {
+const BlogForm = ({ handleBlogSubmit, toggleShowBlogForm }) => {
 
   const [title, setTitle] = useState([])
   const [author, setAuthor] = useState([])
   const [url, setUrl] = useState([])
 
-  const handleBlogSubmit = async (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
-    try {
-      const response = await blogService.create({
-        title, author, url
-      })
-      const blogPost = response.data
-      setTitle('')
-      setAuthor('')
-      setUrl('')
-      setBlogs(blogPost)
-      setNotificationMessage({
-        text: `a new blog ${blogPost.title} by ${blogPost.author} added`,
-        type: 'notification'
-      })
-      toggleShowBlogForm()
-      setTimeout(() => {
-        setNotificationMessage(null)
-      }, 5000)
-    } catch (exception) {
-      console.log(exception)
-      setNotificationMessage({
-        text: 'bad!!!',
-        type: 'error'
-      })
-      setTimeout(() => {
-        setNotificationMessage(null)
-      }, 5000)
-    }
+   
+    handleBlogSubmit({
+      title, author, url
+    })
+    setTitle('')
+    setAuthor('')
+    setUrl('')
   }
 
   return (
-    <form onSubmit={handleBlogSubmit}>
+    <form onSubmit={handleSubmit}>
       <div>
-        <label>title: </label> <input type="text" value={title} onChange={e => setTitle(e.target.value)} />
+        <label>title: </label> <input className="title" type="text" value={title} onChange={e => setTitle(e.target.value)} />
       </div>
       <div>
-        <label>author: </label> <input type="text" value={author} onChange={e => setAuthor(e.target.value)} />
+        <label>author: </label> <input className="author" type="text" value={author} onChange={e => setAuthor(e.target.value)} />
       </div>
       <div>
-        <label>url: </label> <input type="text" value={url} onChange={e => setUrl(e.target.value)} />
+        <label>url: </label> <input className="url" type="text" value={url} onChange={e => setUrl(e.target.value)} />
       </div>
       <div>
-        <button>Create</button>
+        <button id="new-blog-button">Create</button>
         <button onClick={() => toggleShowBlogForm()}>Cancel</button>
       </div>
     </form>

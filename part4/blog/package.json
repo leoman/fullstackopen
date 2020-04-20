@@ -8,7 +8,8 @@
     "dev": "cross-env NODE_ENV=development nodemon index.js",
     "lint": "eslint . --fix",
     "test": "cross-env NODE_ENV=test jest --verbose --runInBand",
-    "test:one": "npm test -- -t"
+    "test:one": "npm test -- -t",
+    "start:test": "cross-env NODE_ENV=test nodemon index.js"
   },
   "author": "",
   "license": "ISC",
