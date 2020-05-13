@@ -1,26 +1,10 @@
 import React, { useState } from 'react'
 import { useMutation } from '@apollo/client';
-import { CREATE_BOOK, ALL_BOOKS } from '../queries'
+import { CREATE_BOOK } from '../queries'
 
-const updateCacheWith = (store, addedBook) => {
 
-  const includedIn = (set, object) => {
-    return (set.map(book => book.id)).includes(object.id)
-  }
 
-  const dataInStore = store.readQuery({ query: ALL_BOOKS })
-  if(!includedIn(dataInStore.allBooks, addedBook)) {
-    store.writeQuery({
-      query: ALL_BOOKS,
-      data: {
-        ...dataInStore,
-        allBooks: [...dataInStore.allBooks, addedBook]
-      }
-    })
-  }
-}
-
-const NewBook = (props) => {
+const NewBook = ({ updateCacheWith, ...props }) => {
   const [title, setTitle] = useState('')
   const [author, setAuhtor] = useState('')
   const [published, setPublished] = useState('')
@@ -29,7 +13,8 @@ const NewBook = (props) => {
 
   const [ createBook ] = useMutation(CREATE_BOOK, {
     update: (store, response) => {
-      updateCacheWith(store, response.data.addBook)
+      console.log('here i am')
+      updateCacheWith(response.data.addBook)
     },
   })
 

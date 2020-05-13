@@ -1,5 +1,6 @@
-const { ApolloServer, UserInputError, gql, AuthenticationError } = require('apollo-server')
+const { ApolloServer, UserInputError, gql, AuthenticationError, PubSub } = require('apollo-server')
 const jwt = require('jsonwebtoken')
+const pubsub = new PubSub()
 
 const mongoose = require('mongoose')
 const Book = require('./models/book')
@@ -46,6 +47,7 @@ const typeDefs = gql`
   type Author {
     name: String!
     bookcount: Int!
+    books: [Book!]!
     born: Int
     id: ID!
   }
@@ -79,6 +81,10 @@ const typeDefs = gql`
       password: String!
     ): Token
   }
+
+  type Subscription {
+    bookAdded: Book!
+  }  
 `
 
 const resolvers = {
@@ -128,7 +134,8 @@ const resolvers = {
     }
   },
   Author: {
-    bookcount: (root) => Book.countDocuments({ author: { $in: root.id } })
+    // bookcount: (root) => Book.countDocuments({ author: { $in: root.id } })
+    bookcount: (root) => root.books.length
   },
   Mutation: {
     addBook: async (root, args, { currentUser }) => {
@@ -159,6 +166,8 @@ const resolvers = {
           invalidArgs: args,
         })
       }
+
+      pubsub.publish('BOOK_ADDED', { bookAdded: book })
   
       return book
     },
@@ -210,7 +219,12 @@ const resolvers = {
   
       return { value: jwt.sign(userForToken, JWT_SECRET) }
     },
-  }
+  },
+  Subscription: {
+    bookAdded: {
+      subscribe: () => pubsub.asyncIterator(['BOOK_ADDED'])
+    },
+  },
 }
 
 const authorNameToId = async (name) => {
@@ -221,8 +235,9 @@ const authorNameToId = async (name) => {
 
 const getAuthorDetails = (booklist) => {
   return booklist.map(book => {
-    const { title, published, genres, author } = book
+    const { id, title, published, genres, author } = book
     return {
+      id,
       title,
       published,
       genres,
@@ -246,6 +261,7 @@ const server = new ApolloServer({
   }
 })
 
-server.listen().then(({ url }) => {
+server.listen().then(({ url, subscriptionsUrl }) => {
   console.log(`Server ready at ${url}`)
+  console.log(`Subscriptions ready at ${subscriptionsUrl}`)
 })
