@@ -27,6 +27,7 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
 const typeDefs = gql`
   type User {
     username: String!
+    favoriteGenre: String!
     id: ID!
   }
 
@@ -53,6 +54,7 @@ const typeDefs = gql`
     bookCount : Int!
     authorCount : Int!
     allBooks(author: String, genre: String) : [Book!]!
+    allBooksByFave : [Book!]!
     allAuthors : [Author!]!
     me: User
   }
@@ -111,6 +113,14 @@ const resolvers = {
         })
         return getAuthorDetails(allBooks)
       }
+    },
+    allBooksByFave: async (root, args, { currentUser }) => {
+      if (!currentUser) {
+        throw new AuthenticationError('Not Authenticated, please sign in')
+      }
+
+      const allBooks = await Book.find({ genres: { $in: currentUser.favoriteGenre } })
+      return getAuthorDetails(allBooks)
     },
     allAuthors: (root, args) => Author.find({}).populate('books'),
     me: (root, args, context) => {
