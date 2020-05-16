@@ -1,33 +1,33 @@
-interface Results {
-  periodLength: number,
-  trainingDays: number,
-  success: boolean,
-  rating: number,
-  ratingDescription: string,
-  target: number,
-  average: number
+export interface Results {
+  periodLength: number;
+  trainingDays: number;
+  success: boolean;
+  rating: number;
+  ratingDescription: string;
+  target: number;
+  average: number;
 }
 
-interface ExerciseValues {
+export interface ExerciseValues {
   target: number;
   exercises: Array<number>;
 }
 
-const parseArgument = (args: Array<string>): ExerciseValues => {
-  if (args.length < 4) throw new Error('Not enough arguments');
+// const parseArgument = (args: Array<string>): ExerciseValues => {
+//   if (args.length < 4) throw new Error('Not enough arguments');
 
-  const [lang, path, target, ...exercises] = args
-  const exercisesAsNumbers = exercises.map(d => Number(d))
+//   const [, , target, ...exercises] = args
+//   const exercisesAsNumbers = exercises.map(d => Number(d))
 
-  if (!isNaN(Number(target))) {
-    return {
-      target: Number(target),
-      exercises: exercisesAsNumbers
-    }
-  } else {
-    throw new Error('Provided values were not numbers!');
-  }
-} 
+//   if (!isNaN(Number(target))) {
+//     return {
+//       target: Number(target),
+//       exercises: exercisesAsNumbers
+//     }
+//   } else {
+//     throw new Error('Provided values were not numbers!');
+//   }
+// } 
 
 const calculateExercises = (exercises: Array<number>, target: number): Results => {
 
@@ -45,10 +45,12 @@ const calculateExercises = (exercises: Array<number>, target: number): Results =
   }
 }
 
-try {
-  const { target, exercises } = parseArgument(process.argv);
-  const result = calculateExercises(exercises, target)
-  console.log(result)
-} catch (e) {
-  console.log('Error, something bad happened, message: ', e.message);
-}
+// try {
+//   const { target, exercises } = parseArgument(process.argv);
+//   const result = calculateExercises(exercises, target)
+//   console.log(result)
+// } catch (e) {
+//   console.log('Error, something bad happened, message: ', e.message);
+// }
+
+export default calculateExercises
