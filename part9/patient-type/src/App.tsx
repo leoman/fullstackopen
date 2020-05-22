@@ -1,5 +1,5 @@
 import React from "react";
-import { AppProps } from './index'
+import { AppProps } from './types'
 import Header from './components/Header'
 import Content from './components/Content'
 import Total from './components/Total'
