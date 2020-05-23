@@ -3,12 +3,16 @@ import { Patient } from "../types";
 
 export type Action =
   | {
-      type: "SET_PATIENT_LIST";
-      payload: Patient[];
-    }
-  | {
       type: "ADD_PATIENT";
       payload: Patient;
+    }
+  | {
+      type: "SET_PATIENT";
+      payload: Patient;
+    }
+  |  {
+      type: "SET_PATIENT_LIST";
+      payload: Patient[];
     };
 
 export const reducer = (state: State, action: Action): State => {
@@ -22,6 +26,18 @@ export const reducer = (state: State, action: Action): State => {
             {}
           ),
           ...state.patients
+        }
+      };
+    case "SET_PATIENT":
+      console.log('SET_PATIENT')
+      return {
+        ...state,
+        patients: {
+          ...state.patients,
+          [action.payload.id]: {
+            ...action.payload,
+            completeInfo: true,
+          }
         }
       };
     case "ADD_PATIENT":

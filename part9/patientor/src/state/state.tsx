@@ -3,6 +3,10 @@ import { Patient } from "../types";
 
 import { Action } from "./reducer";
 
+export const setPatientList = (patientListFromApi: Patient[]): Action => ({ type: "SET_PATIENT_LIST", payload: patientListFromApi });
+export const setPatient = (patient: Patient): Action => ({ type: "SET_PATIENT", payload: patient });
+export const addPatient = (newPatient: Patient): Action => ({ type: "ADD_PATIENT", payload: newPatient });
+
 export type State = {
   patients: { [id: string]: Patient };
 };
