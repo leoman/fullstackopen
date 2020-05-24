@@ -23,10 +23,7 @@ const getPatientInfo = (id: string): Patient => {
   if(!patient) {
     throw new Error(`no patient found for id: ${id}`);
   }
-  return {
-    ...patient,
-    entries: [],
-  };
+  return patient;
 };
 
 const addPatient = ( entry: NewPatientEntry ): Patient => {
