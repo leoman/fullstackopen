@@ -13,7 +13,7 @@ app.get('/api/ping', (_req, res) => {
   res.status(200).json('pong');
 });
 
-app.use('/api/diagnoses', diagnosesRouter);
+app.use('/api/diagnosis', diagnosesRouter);
 app.use('/api/patients', patientsRouter);
   
 app.listen(PORT, () => {

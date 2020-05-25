@@ -1,33 +1,39 @@
 import React, { useEffect } from "react";
-import axios from "axios";
-import { Container, Table, Button } from "semantic-ui-react";
-import { Link, useParams } from "react-router-dom";
+import { Container } from "semantic-ui-react";
+import { useParams } from "react-router-dom";
 
-import { apiBaseUrl } from "../constants";
-import { useStateValue, setPatient } from "../state";
-import { Patient } from "../types";
+import { useStateValue } from "../state";
+import { fetchPatientInfo } from '../service'
+import { Patient, Entry } from "../types";
 
 const PatientPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const [{ patients }, dispatch] = useStateValue();
+  const [{ patients, diagnosis }, dispatch] = useStateValue();
   const patient: Patient | undefined = patients[id];
+
+  const findDiagnosis = (code: string) => {
+    if (Object.keys(diagnosis).length) {
+      return diagnosis[code].name
+    }
+  }
+  
+  const renderEntry = (entry: Entry) => {
+    return (
+      <div key={entry.id}>
+        <p>{entry.date} {entry.description}</p>
+        <ul>
+          {entry.diagnosisCodes?.map(code => {
+            return <li key={code}>{code} {findDiagnosis(code)}</li>
+          })}
+        </ul>
+      </div>
+    )
+  }
 
   useEffect(() => {
     
     if(!patient || !patient.completeInfo) {
-
-      const fetchPatientInfo = async () => {
-        try {
-          const { data } = await axios.get<Patient>(
-            `${apiBaseUrl}/patients/${id}`
-          );
-          console.log(data)
-          dispatch(setPatient(data));
-        } catch (e) {
-          console.error(e);
-        }
-      };
-      fetchPatientInfo();
+      fetchPatientInfo(id, dispatch);
     }
   }, [id, patient, dispatch]);
 
@@ -42,6 +48,15 @@ const PatientPage: React.FC = () => {
         </div>
         <div>
           occupation: {patient.occupation}
+        </div>
+        <br />
+        <div>
+          <h4>entries</h4>
+          <div>
+            {patient.entries.map((entry: Entry) => {
+              return renderEntry(entry)
+            })}
+          </div>
         </div>
       </Container>
     </div>
